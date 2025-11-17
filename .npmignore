@@ -1,0 +1,117 @@
+# ============================================
+# NPM IGNORE - What NOT to publish to npm
+# ============================================
+# Note: package.json "files" field is used as whitelist
+# This .npmignore provides additional exclusions
+
+# ====================
+# DEVELOPMENT FILES (REMOVE - Dev only)
+# ====================
+
+# TypeScript source files - only compiled JS goes to npm
+nodes/
+credentials/
+index.ts
+
+# TypeScript config
+tsconfig.json
+tsconfig.*.json
+
+# Build tools and configs
+eslint.config.mjs
+.eslintrc*
+.prettierrc*
+.editorconfig
+
+# Development scripts
+dev-wrapper.js
+start-dev.ps1
+start-dev.sh
+*.bat
+
+# ====================
+# GIT & VERSION CONTROL (REMOVE - Repo only)
+# ====================
+.git
+.gitignore
+.gitattributes
+.github
+
+# ====================
+# IDE & EDITOR (REMOVE - Dev only)
+# ====================
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.project
+.settings
+
+# ====================
+# DOCUMENTATION (REMOVE - Keep only README & LICENSE)
+# ====================
+COMPLIANCE.md
+SUMMARY.md
+CHANGELOG.md
+dev-output.txt
+dev-debug-output.txt
+
+# ====================
+# DEPENDENCIES (REMOVE - npm installs from package.json)
+# ====================
+node_modules/
+package-lock.json
+npm-debug.log*
+yarn.lock
+pnpm-lock.yaml
+
+# ====================
+# ENVIRONMENT & SECRETS (REMOVE - Security)
+# ====================
+.env
+.env.*
+*.key
+*.pem
+secrets/
+
+# ====================
+# OS FILES (REMOVE - Not needed)
+# ====================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ====================
+# LOGS (REMOVE - Not needed at runtime)
+# ====================
+*.log
+logs/
+
+# ====================
+# TESTING (REMOVE - Dev only)
+# ====================
+test/
+tests/
+*.test.ts
+*.test.js
+*.spec.ts
+*.spec.js
+coverage/
+.nyc_output/
+
+# ====================
+# BUILD ARTIFACTS (REMOVE - Keep only final dist)
+# ====================
+*.tsbuildinfo
+dist/tsconfig.tsbuildinfo
+dist/package.json
+.cache/
+tmp/
+temp/
+
+# ====================
+# OPTIONAL: Source maps (REMOVE for smaller package)
+# ====================
+# Uncomment next line to exclude source maps
+# dist/**/*.map

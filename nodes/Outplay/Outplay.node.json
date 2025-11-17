@@ -1,0 +1,19 @@
+{
+  "node": "n8n-nodes-outplay.outplay",
+  "nodeVersion": "1.0",
+  "codexVersion": "1.0",
+  "categories": ["Sales & CRM"],
+  "resources": {
+    "primaryDocumentation": [
+      {
+        "url": "https://docs.outplayhq.com/"
+      }
+    ],
+    "credentialDocumentation": [
+      {
+        "url": "https://docs.outplayhq.com/authentication"
+      }
+    ]
+  },
+  "alias": ["sales", "crm", "outreach", "prospect", "email campaign", "sales engagement"]
+}

@@ -1,0 +1,446 @@
+import {
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeType,
+	INodeTypeDescription,
+	IDataObject,
+	NodeOperationError,
+} from 'n8n-workflow';
+
+export class Outplay implements INodeType {
+	description: INodeTypeDescription = {
+		displayName: 'Outplay',
+		name: 'outplay',
+		icon: 'file:outplay-icon.svg',
+		group: ['transform'],
+		version: 1,
+		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
+		description: 'Interact with Outplay API',
+		defaults: {
+			name: 'Outplay',
+		},
+		inputs: ['main'],
+		outputs: ['main'],
+		credentials: [
+			{
+				name: 'outplayApi',
+				required: true,
+			},
+		],
+		requestDefaults: {
+			baseURL: 'https://dev-api.outplayhq.com/api/v1',
+			headers: {
+				Accept: 'application/json',
+				'Content-Type': 'application/json',
+			},
+		},
+		properties: [
+			// Resources
+			{
+				displayName: 'Resource',
+				name: 'resource',
+				type: 'options',
+				noDataExpression: true,
+				options: [
+					{
+						name: 'Prospect',
+						value: 'prospect',
+					},
+				],
+				default: 'prospect',
+			},
+
+			// Prospect Operations
+			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				noDataExpression: true,
+				displayOptions: {
+					show: {
+						resource: ['prospect'],
+					},
+				},
+				options: [
+					{
+						name: 'Save Prospect',
+						value: 'save',
+						description: 'Save a new prospect',
+						action: 'Save a prospect',
+					},
+					{
+						name: 'Get Prospect',
+						value: 'get',
+						description: 'Get a prospect by ID',
+						action: 'Get a prospect',
+					},
+				],
+				default: 'save',
+			},
+
+			// Prospect Fields - Get
+			{
+				displayName: 'Prospect ID',
+				name: 'prospectId',
+				type: 'string',
+				required: true,
+				displayOptions: {
+					show: {
+						resource: ['prospect'],
+						operation: ['get'],
+					},
+				},
+				default: '',
+				placeholder: 'e.g. 12345',
+				description: 'The ID of the prospect to retrieve',
+			},
+
+			// Simplify Parameter
+			{
+				displayName: 'Simplify',
+				name: 'simplify',
+				type: 'boolean',
+				displayOptions: {
+					show: {
+						resource: ['prospect'],
+						operation: ['get', 'save'],
+					},
+				},
+				default: true,
+				description: 'Whether to return a simplified version of the response instead of the raw data',
+			},
+
+			// Prospect Fields - Save
+			{
+				displayName: 'Email',
+				name: 'emailid',
+				type: 'string',
+				placeholder: 'e.g. nathan@n8n.io',
+				required: true,
+				displayOptions: {
+					show: {
+						resource: ['prospect'],
+						operation: ['save'],
+					},
+				},
+				default: '',
+				description: 'Email address (must be unique)',
+			},
+			{
+				displayName: 'First Name',
+				name: 'firstname',
+				type: 'string',
+				displayOptions: {
+					show: {
+						resource: ['prospect'],
+						operation: ['save'],
+					},
+				},
+				default: '',
+				description: 'The prospect\'s first name',
+			},
+			{
+				displayName: 'Last Name',
+				name: 'lastname',
+				type: 'string',
+				displayOptions: {
+					show: {
+						resource: ['prospect'],
+						operation: ['save'],
+					},
+				},
+				default: '',
+				description: 'The prospect\'s last name',
+			},
+			{
+				displayName: 'Additional Fields',
+				name: 'additionalFields',
+				type: 'collection',
+				placeholder: 'Add Field',
+				default: {},
+				displayOptions: {
+					show: {
+						resource: ['prospect'],
+						operation: ['save'],
+					},
+				},
+				options: [
+					{
+						displayName: 'City',
+						name: 'city',
+						type: 'string',
+						default: '',
+
+					},
+					{
+						displayName: 'Company',
+						name: 'company',
+						type: 'string',
+						default: '',
+						placeholder: 'e.g. Acme Corp',
+						description: 'Company or organization name',
+					},
+					{
+						displayName: 'Country',
+						name: 'country',
+						type: 'string',
+						default: '',
+
+					},
+					{
+						displayName: 'Designation',
+						name: 'designation',
+						type: 'string',
+						default: '',
+						placeholder: 'e.g. Sales Manager',
+						description: 'Job title or designation',
+					},
+					{
+						displayName: 'Facebook',
+						name: 'facebook',
+						type: 'string',
+						default: '',
+						placeholder: 'e.g. https://facebook.com/username',
+						description: 'Facebook profile URL',
+					},
+					{
+						displayName: 'LinkedIn',
+						name: 'linkedin',
+						type: 'string',
+						default: '',
+						placeholder: 'e.g. https://linkedin.com/in/username',
+						description: 'LinkedIn profile URL',
+					},
+					{
+						displayName: 'Phone',
+						name: 'phone',
+						type: 'string',
+						default: '',
+						placeholder: 'e.g. +1234567890',
+						description: 'Phone number',
+					},
+					{
+						displayName: 'Sequence Identifier',
+						name: 'sequenceidentifier',
+						type: 'string',
+						default: '',
+						placeholder: 'e.g. my-sequence-ID',
+						description: 'Identifier for the sequence to add the prospect to',
+					},
+					{
+						displayName: 'State',
+						name: 'state',
+						type: 'string',
+						default: '',
+
+					},
+					{
+						displayName: 'Timezone',
+						name: 'timezone',
+						type: 'string',
+						default: '',
+						placeholder: 'e.g. America/Los_Angeles',
+						description: 'Timezone in IANA format (e.g., America/Los_Angeles)',
+					},
+					{
+						displayName: 'Twitter',
+						name: 'twitter',
+						type: 'string',
+						default: '',
+						placeholder: 'e.g. @username',
+						description: 'Twitter handle',
+					},
+				],
+			},
+			{
+				displayName: 'Tags',
+				name: 'tags',
+				type: 'fixedCollection',
+				typeOptions: {
+					multipleValues: true,
+				},
+				placeholder: 'Add Tag',
+				default: {},
+				displayOptions: {
+					show: {
+						resource: ['prospect'],
+						operation: ['save'],
+					},
+				},
+				options: [
+					{
+						name: 'tag',
+						displayName: 'Tag',
+						values: [
+							{
+								displayName: 'Tag Name',
+								name: 'value',
+								type: 'string',
+								default: '',
+								placeholder: 'e.g. vip',
+								description: 'Tag to assign to the prospect',
+							},
+						],
+					},
+				],
+				description: 'Tags to assign to the prospect',
+			},
+			{
+				displayName: 'Custom Fields',
+				name: 'customFields',
+				type: 'fixedCollection',
+				typeOptions: {
+					multipleValues: true,
+				},
+				placeholder: 'Add Custom Field',
+				default: {},
+				displayOptions: {
+					show: {
+						resource: ['prospect'],
+						operation: ['save'],
+					},
+				},
+				options: [
+					{
+						name: 'field',
+						displayName: 'Field',
+						values: [
+							{
+								displayName: 'Field Name',
+								name: 'name',
+								type: 'string',
+								default: '',
+								description: 'Name of the custom field',
+							},
+							{
+								displayName: 'Field Value',
+								name: 'value',
+								type: 'string',
+								default: '',
+								description: 'Value of the custom field',
+							},
+						],
+					},
+				],
+				description: 'Additional custom fields as key-value pairs',
+			},
+		],
+		usableAsTool: true,
+	};
+
+	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
+		const items = this.getInputData();
+		const returnData: IDataObject[] = [];
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
+
+		const credentials = await this.getCredentials('outplayApi');
+		const location = (credentials.location as string).toLowerCase();
+		const baseURL = `https://${location}-api.outplayhq.com/api/v1`;
+
+	
+		for (let i = 0; i < items.length; i++) {
+			try {
+				if (resource === 'prospect') {
+					if (operation === 'save') {
+						// Save prospect
+						const emailid = this.getNodeParameter('emailid', i) as string;
+						const firstname = this.getNodeParameter('firstname', i) as string;
+						const lastname = this.getNodeParameter('lastname', i) as string;
+						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const tagsCollection = this.getNodeParameter('tags', i) as IDataObject;
+						const customFields = this.getNodeParameter('customFields', i) as IDataObject;
+
+						const body: IDataObject = {
+							emailid,
+							firstname,
+							lastname,
+							...additionalFields,
+						};
+
+						// Convert tags from fixedCollection to array of strings
+						if (tagsCollection && tagsCollection.tag) {
+							const tagArray = tagsCollection.tag as Array<{ value: string }>;
+							const tags: string[] = [];
+							for (const tag of tagArray) {
+								if (tag.value) {
+									tags.push(tag.value);
+								}
+							}
+							if (tags.length > 0) {
+								body.tags = tags;
+							}
+						}
+
+						// Add custom fields if provided
+						if (customFields && customFields.field) {
+							const fields: IDataObject = {};
+							const fieldArray = customFields.field as Array<{ name: string; value: string }>;
+							for (const field of fieldArray) {
+								if (field.name && field.value) {
+									fields[field.name] = field.value;
+								}
+							}
+							if (Object.keys(fields).length > 0) {
+								body.fields = fields;
+							}
+						}
+
+						const responseData = await this.helpers.httpRequestWithAuthentication.call(
+							this,
+							'outplayApi',
+							{
+								method: 'POST',
+								baseURL: baseURL,
+								url: '/prospect/add',
+								body,
+								json: true,
+							},
+						);
+
+						returnData.push(responseData as IDataObject);
+					} else if (operation === 'get') {
+						// Get prospect by ID
+						const prospectId = this.getNodeParameter('prospectId', i) as string;
+
+						const responseData = await this.helpers.httpRequestWithAuthentication.call(
+							this,
+							'outplayApi',
+							{
+								method: 'GET',
+								baseURL: baseURL,
+								url: `/prospect/${prospectId}`,
+								json: true,
+							},
+						);
+
+						returnData.push(responseData as IDataObject);
+					}
+				}
+			} catch (error) {
+				if (this.continueOnFail()) {
+					const errorData = error instanceof Error ? error.message : 'An issue occurred while processing the request';
+					returnData.push({ 
+						json: { 
+							error: errorData,
+							item: i,
+							operation,
+							resource 
+						},
+						pairedItem: { item: i }
+					} as INodeExecutionData);
+					continue;
+				}
+				
+				const errorMessage = error instanceof Error ? error.message : 'Unknown issue';
+				throw new NodeOperationError(
+					this.getNode(),
+					`Failed to ${operation} ${resource} [item ${i}]: ${errorMessage}`,
+					{ itemIndex: i }
+				);
+			}
+		}
+
+		return [this.helpers.returnJsonArray(returnData)];
+	}
+}

@@ -1,0 +1,68 @@
+{
+  "name": "n8n-nodes-outplay",
+  "version": "0.1.0",
+  "description": "n8n nodes for Outplay API integration",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "homepage": "https://github.com/outplay/n8n-nodes-outplay",
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n",
+    "outplay",
+    "sales",
+    "engagement",
+    "crm"
+  ],
+  "author": {
+    "name": "DEEPAK9110",
+    "email": "deepak.kumar@outplayhq.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/outplay/n8n-nodes-outplay.git"
+  },
+  "scripts": {
+    "build": "n8n-node build",
+    "build:watch": "tsc --watch",
+    "dev": "node dev-wrapper.js",
+    "dev:cli": "n8n-node dev",
+    "dev:external": "n8n-node dev --external-n8n",
+    "dev:n8n": "powershell -ExecutionPolicy Bypass -File ./start-dev.ps1",
+    "dev:n8n:unix": "bash ./start-dev.sh",
+    "test": "npm run build && npm run lint",
+    "prepack": "npm run build && node -e \"const fs=require('fs'); try{fs.unlinkSync('dist/package.json')}catch{}; try{fs.unlinkSync('dist/tsconfig.tsbuildinfo')}catch{}; console.log('✓ Cleaned dist artifacts')\"",
+    "start:n8n": "set N8N_DEV_RELOAD=true && n8n start",
+    "lint": "n8n-node lint",
+    "lint:fix": "n8n-node lint --fix",
+    "release": "n8n-node release",
+    "prepublishOnly": "n8n-node prerelease"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE.md"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "strict": true,
+    "credentials": [
+      "dist/credentials/OutplayApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/Outplay/Outplay.node.js",
+      "dist/nodes/Outplay/OutplayTrigger.node.js"
+    ]
+  },
+  "devDependencies": {
+    "@n8n/node-cli": "^0.14.0",
+    "eslint": "9.32.0",
+    "n8n-node-dev": "^1.118.0",
+    "prettier": "3.6.2",
+    "release-it": "^19.0.4",
+    "typescript": "5.9.2"
+  },
+  "peerDependencies": {
+    "n8n-workflow": "^1.117.0"
+  }
+}

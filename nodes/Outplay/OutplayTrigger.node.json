@@ -1,0 +1,19 @@
+{
+  "node": "n8n-nodes-outplay.outplayTrigger",
+  "nodeVersion": "1.0",
+  "codexVersion": "1.0",
+  "categories": ["Sales & CRM"],
+  "resources": {
+    "primaryDocumentation": [
+      {
+        "url": "https://docs.outplayhq.com/webhooks"
+      }
+    ],
+    "credentialDocumentation": [
+      {
+        "url": "https://docs.outplayhq.com/authentication"
+      }
+    ]
+  },
+  "alias": ["webhook", "sales trigger", "prospect trigger", "email trigger", "outplay events"]
+}

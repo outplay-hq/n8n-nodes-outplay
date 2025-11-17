@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+
+# Build output (NEVER commit dist - it's built during npm publish)
+dist/
+
+# Environment & OS
+.env
+.env.local
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.vscode/
+.idea/
+
+# n8n local development
+.n8n/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Development scripts (keep these out of GitHub)
+dev-wrapper.js
+start-dev.ps1
+start-dev.sh
+dev.bat
+dev.ps1
+dev-sync.ps1
+
+# Documentation (internal only - not for GitHub)
+SUMMARY.md
+OPTIMIZATION-COMPLETE.md
+PUBLISH-CHECKLIST.md
+PRE-PUBLISH-VERIFICATION.md
+PUBLISH-NOW.md
+dev-output.txt
+COMPLIANCE.md
+
+# Package tarballs
+*.tgz
