@@ -5,7 +5,7 @@
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "homepage": "https://github.com/outplay/n8n-nodes-outplay",
+  "homepage": "https://github.com/outplay-hq/n8n-nodes-outplay",
   "keywords": [
     "n8n-community-node-package",
     "n8n",
@@ -20,7 +20,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/outplay/n8n-nodes-outplay.git"
+    "url": "git+https://github.com/outplay-hq/n8n-nodes-outplay.git"
   },
   "scripts": {
     "build": "n8n-node build",
