@@ -28,7 +28,6 @@
     "dev": "n8n-node dev",
     "dev:cli": "n8n-node dev",
     "dev:external": "n8n-node dev --external-n8n",
-    "dev:n8n": "powershell -ExecutionPolicy Bypass -File ./start-dev.ps1",
     "dev:n8n:unix": "bash ./start-dev.sh",
     "test": "npm run build && npm run lint",
     "prepack": "npm run clean && npm run build",
