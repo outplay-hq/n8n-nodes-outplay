@@ -31,7 +31,7 @@
     "dev:n8n": "powershell -ExecutionPolicy Bypass -File ./start-dev.ps1",
     "dev:n8n:unix": "bash ./start-dev.sh",
     "test": "npm run build && npm run lint",
-    "prepack": "npm run build && node -e \"const fs=require('fs'); try{fs.unlinkSync('dist/package.json')}catch{}; try{fs.unlinkSync('dist/tsconfig.tsbuildinfo')}catch{}; console.log('✓ Cleaned dist artifacts')\"",
+    "prepack": "npm run clean && npm run build",
     "start:n8n": "set N8N_DEV_RELOAD=true && n8n start",
     "lint": "n8n-node lint",
     "lint:fix": "n8n-node lint --fix",
