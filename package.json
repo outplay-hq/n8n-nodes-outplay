@@ -23,6 +23,7 @@
     "url": "git+https://github.com/outplay-hq/n8n-nodes-outplay.git"
   },
   "scripts": {
+    "clean": "rimraf dist",
     "build": "n8n-node build",
     "build:watch": "tsc --watch",
     "dev": "n8n-node dev",
