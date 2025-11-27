@@ -8,7 +8,7 @@ import {
 export class OutplayApi implements ICredentialType {
 	name = 'outplayApi';
 	displayName = 'Outplay API';
-	documentationUrl = 'https://support.outplay.ai/#/';
+	documentationUrl = 'https://support.outplay.ai/#/article/8216';
 	readonly icon = {
 		light: 'file:outplay-icon.svg',
 		dark: 'file:outplay-icon.svg',
