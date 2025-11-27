@@ -140,7 +140,7 @@ This node was built using the official n8n-node-dev tool and follows all n8n com
 ## Resources
 
 * [n8n community nodes documentation](https://docs.n8n.io/integrations/#community-nodes)
-* [Outplay API Documentation](https://support.outplay.ai/#/)
+* [Outplay API Documentation](https://support.outplay.ai/#/article/3749)
 * [Outplay Website](https://www.outplayhq.com/)
 * [GitHub Repository](https://github.com/outplay/n8n-nodes-outplay)
 
@@ -151,7 +151,7 @@ This node was built using the official n8n-node-dev tool and follows all n8n com
 ## Support
 
 For issues or questions:
-- Create an issue on [GitHub](https://github.com/outplay/n8n-nodes-outplay/issues)
+- Create an issue on [GitHub](https://github.com/outplay-hq/n8n-nodes-outplay/issues)
 - Contact Outplay support at [support.outplay.ai](https://support.outplay.ai/#/)
 
 ## Version History
