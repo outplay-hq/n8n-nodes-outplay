@@ -109,8 +109,12 @@ export class OutplayTrigger implements INodeType {
 				} catch (error) {
 					const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 					const statusCode = error instanceof Error ? (error as unknown as {statusCode?: number}).statusCode : undefined;
-					console.error('❌ Failed to unsubscribe old event');
-					console.error('Status:', statusCode, 'Error:', errorMessage);
+					this.logger.error('❌ Failed to unsubscribe old event');
+					throw new NodeOperationError(
+						this.getNode(),
+						`Failed to unsubscribe old webhook in Outplay (Status: ${statusCode}): ${errorMessage}`,
+					);
+
 				}				
 					delete webhookData.webhookId;
 					delete webhookData.webhookEvent;
@@ -168,10 +172,6 @@ export class OutplayTrigger implements INodeType {
 					const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 					const statusCode = error instanceof Error ? (error as unknown as {statusCode?: number}).statusCode : undefined;
 					
-					console.error('❌ Webhook subscription FAILED');
-					console.error('Status:', statusCode);
-					console.error('Error:', errorMessage);
-					
 					throw new NodeOperationError(
 						this.getNode(),
 						`Failed to subscribe webhook in Outplay (Status: ${statusCode}): ${errorMessage}`,
@@ -185,7 +185,6 @@ export class OutplayTrigger implements INodeType {
 				const event = (webhookData.webhookEvent as string) || (this.getNodeParameter('event') as string);
 
 				if (!webhookUrl) {
-					console.log('No webhook to unsubscribe');
 					return true;
 				}
 
@@ -218,13 +217,7 @@ export class OutplayTrigger implements INodeType {
 				} catch (error) {
 					const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 					const statusCode = error instanceof Error ? (error as unknown as {statusCode?: number}).statusCode : undefined;
-					const responseBody = error instanceof Error ? (error as unknown as {response?: {body?: unknown}}).response?.body : undefined;
-					
-					console.error('\n❌ Webhook unsubscription FAILED');
-					console.error('Status:', statusCode);
-					console.error('Error:', errorMessage);
-					console.error('Response:', responseBody);
-					
+	
 					throw new NodeOperationError(
 						this.getNode(),
 						`Failed to unsubscribe webhook in Outplay (Status: ${statusCode}): ${errorMessage}`,
@@ -240,7 +233,6 @@ export class OutplayTrigger implements INodeType {
 
 		// Check if the webhook is a test/ping from Outplay
 		if (bodyData.ping || bodyData.test) {
-			console.log('⚠️ Ping/test webhook received, ignoring');
 			// Return OK but don't start workflow
 			return {
 				webhookResponse: 'OK',

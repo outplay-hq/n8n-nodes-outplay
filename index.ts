@@ -1,3 +1,9 @@
-// Entry point for n8n community node
-// n8n automatically discovers nodes and credentials from the package.json n8n section
-export {};
+import { Outplay
+ } from "./nodes/Outplay/Outplay.node";
+ import { OutplayTrigger
+  } from "./nodes/Outplay/OutplayTrigger.node";
+import { OutplayApi
+ } from "./credentials/OutplayApi.credentials";
+
+ export {OutplayApi}
+ export {Outplay,OutplayTrigger}
