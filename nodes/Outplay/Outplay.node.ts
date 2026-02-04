@@ -95,21 +95,6 @@ export class Outplay implements INodeType {
 				description: 'The ID of the prospect to retrieve',
 			},
 
-			// Simplify Parameter
-			{
-				displayName: 'Simplify',
-				name: 'simplify',
-				type: 'boolean',
-				displayOptions: {
-					show: {
-						resource: ['prospect'],
-						operation: ['get', 'save'],
-					},
-				},
-				default: true,
-				description: 'Whether to return a simplified version of the response instead of the raw data',
-			},
-
 			// Prospect Fields - Save
 			{
 				displayName: 'Email',
@@ -330,7 +315,7 @@ export class Outplay implements INodeType {
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
-		const returnData: IDataObject[] = [];
+		const returnData: INodeExecutionData[] = [];
 		const resource = this.getNodeParameter('resource', 0);
 		const operation = this.getNodeParameter('operation', 0);
 
@@ -398,7 +383,10 @@ export class Outplay implements INodeType {
 							},
 						);
 
-						returnData.push(responseData as IDataObject);
+						returnData.push({ 
+							json: responseData as IDataObject,
+							pairedItem: { item: i }
+						});
 					} else if (operation === 'get') {
 						// Get prospect by ID
 						const prospectId = this.getNodeParameter('prospectId', i) as string;
@@ -414,7 +402,10 @@ export class Outplay implements INodeType {
 							},
 						);
 
-						returnData.push(responseData as IDataObject);
+						returnData.push({ 
+							json: responseData as IDataObject,
+							pairedItem: { item: i }
+						});
 					}
 				}
 			} catch (error) {
@@ -428,7 +419,7 @@ export class Outplay implements INodeType {
 							resource 
 						},
 						pairedItem: { item: i }
-					} as INodeExecutionData);
+					});
 					continue;
 				}
 				
@@ -441,6 +432,6 @@ export class Outplay implements INodeType {
 			}
 		}
 
-		return [this.helpers.returnJsonArray(returnData)];
+		return [returnData];
 	}
 }
