@@ -35,8 +35,7 @@
     "start:n8n": "set N8N_DEV_RELOAD=true && n8n start",
     "lint": "n8n-node lint",
     "lint:fix": "n8n-node lint --fix",
-    "release": "n8n-node release",
-    "prepublishOnly": "n8n-node prerelease"
+    "release": "n8n-node release"
   },
   "files": [
     "dist",
@@ -69,6 +68,6 @@
     "typescript": "5.9.2"
   },
   "peerDependencies": {
-    "n8n-workflow": "^1.117.0"
+    "n8n-workflow": "*"
   }
 }
