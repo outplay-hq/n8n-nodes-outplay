@@ -1,6 +1,8 @@
 import {
 	IExecuteFunctions,
+	ILoadOptionsFunctions,
 	INodeExecutionData,
+	INodePropertyOptions,
 	INodeType,
 	INodeTypeDescription,
 	IDataObject,
@@ -46,6 +48,10 @@ export class Outplay implements INodeType {
 						name: 'Prospect',
 						value: 'prospect',
 					},
+					{
+						name: 'Scheduler',
+						value: 'scheduler',
+					},
 				],
 				default: 'prospect',
 			},
@@ -76,6 +82,93 @@ export class Outplay implements INodeType {
 					},
 				],
 				default: 'save',
+			},
+
+			// Scheduler Operations
+			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				noDataExpression: true,
+				displayOptions: {
+					show: {
+						resource: ['scheduler'],
+					},
+				},
+				options: [
+					{
+						name: 'Create',
+						value: 'create',
+						description: 'Create a scheduler lead with meeting type',
+						action: 'Create a scheduler lead',
+					},
+				],
+				default: 'create',
+			},
+
+			// Scheduler Fields - Meeting Type
+			{
+				displayName: 'Meeting Type Name or ID',
+				name: 'meetingType',
+				type: 'options',
+				typeOptions: {
+					loadOptionsMethod: 'getMeetingTypes',
+				},
+				required: true,
+				displayOptions: {
+					show: {
+						resource: ['scheduler'],
+						operation: ['create'],
+					},
+				},
+				default: '',
+				description: 'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>',
+			},
+
+			// Scheduler Fields - Fields
+			{
+				displayName: 'Fields',
+				name: 'fields',
+				type: 'fixedCollection',
+				typeOptions: {
+					multipleValues: true,
+				},
+				placeholder: 'Add Field',
+				default: {},
+				required: true,
+				displayOptions: {
+					show: {
+						resource: ['scheduler'],
+						operation: ['create'],
+					},
+				},
+				options: [
+					{
+						name: 'field',
+						displayName: 'Field',
+						values: [
+							{
+								displayName: 'Field Name or ID',
+								name: 'fieldIdentifier',
+								type: 'options',
+								typeOptions: {
+									loadOptionsMethod: 'getMeetingFormFields',
+									loadOptionsDependsOn: ['meetingType'],
+								},
+								default: '',
+								description: 'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>',
+							},
+							{
+								displayName: 'Field Value',
+								name: 'fieldValue',
+								type: 'string',
+								default: '',
+								description: 'The value for this field',
+							},
+						],
+					},
+				],
+				description: 'Field identifiers and values for the scheduler lead',
 			},
 
 			// Prospect Fields - Get
@@ -313,6 +406,113 @@ export class Outplay implements INodeType {
 		usableAsTool: true,
 	};
 
+	methods = {
+		loadOptions: {
+			async getMeetingTypes(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+				try {
+					const credentials = await this.getCredentials('outplayApi');
+					const location = (credentials.location as string).toLowerCase();
+					const baseURL = `https://${location}-api.outplayhq.com/api/v1`;
+
+					const responseData = await this.helpers.httpRequestWithAuthentication.call(
+						this,
+						'outplayApi',
+						{
+							method: 'GET',
+							baseURL: baseURL,
+							url: '/Scheduler/GetMeetingType',
+							json: true,
+						},
+					);
+
+					const meetingTypes = responseData as Array<{
+						MeetingId: number;
+						MeetingType: string;
+						Slug: string;
+					}>;
+
+					return meetingTypes.map((meeting) => ({
+						name: meeting.MeetingType,
+						value: `${meeting.MeetingId}::${meeting.Slug}`,
+					}));
+				} catch {
+					return [];
+				}
+			},
+
+			async getMeetingFormFields(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+				try {
+					const credentials = await this.getCredentials('outplayApi');
+					const location = (credentials.location as string).toLowerCase();
+					const baseURL = `https://${location}-api.outplayhq.com/api/v1`;
+
+					const meetingType = this.getNodeParameter('meetingType') as string;
+					
+					// Return empty array if no meeting type is selected yet
+					if (!meetingType || meetingType.trim() === '') {
+						return [];
+					}
+					
+					// Parse meeting type flexibly: "id", "slug", or "id::slug"
+					let meetingTypeId: string | undefined;
+					let meetingTypeSlug: string | undefined;
+					
+					if (meetingType.includes('::')) {
+						// Format: "id::slug"
+						[meetingTypeId, meetingTypeSlug] = meetingType.split('::');
+					} else if (/^\d+$/.test(meetingType)) {
+						// Numeric only: just ID
+						meetingTypeId = meetingType;
+					} else {
+						// Non-numeric: just slug
+						meetingTypeSlug = meetingType;
+					}
+
+					// Build query string with only provided parameters
+					const qs: IDataObject = {};
+					if (meetingTypeId) qs.meetingtypeid = meetingTypeId;
+					if (meetingTypeSlug) qs.meetingtypeslug = meetingTypeSlug;
+
+					const responseData = await this.helpers.httpRequestWithAuthentication.call(
+						this,
+						'outplayApi',
+						{
+							method: 'GET',
+							baseURL: baseURL,
+							url: '/Scheduler/GetMeetingFormFields',
+							qs,
+							json: true,
+						},
+					);
+
+					const result = responseData as {
+						success: boolean;
+						data: {
+							fields: {
+								[key: string]: {
+									fieldname: string;
+									ismandatory: boolean;
+								};
+							};
+						};
+					};
+
+					if (!result.success || !result.data || !result.data.fields) {
+						return [];
+					}
+
+					const fields = result.data.fields;
+					return Object.entries(fields).map(([identifier, fieldData]) => ({
+						name: `${fieldData.fieldname}${fieldData.ismandatory ? ' (Required)' : ''}`,
+						value: identifier,
+					}));
+				} catch {
+					return [];
+				}
+			},
+		},
+	};
+
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
 		const returnData: INodeExecutionData[] = [];
@@ -398,6 +598,64 @@ export class Outplay implements INodeType {
 								method: 'GET',
 								baseURL: baseURL,
 								url: `/prospect/${prospectId}`,
+								json: true,
+							},
+						);
+
+						returnData.push({ 
+							json: responseData as IDataObject,
+							pairedItem: { item: i }
+						});
+					}
+				} else if (resource === 'scheduler') {
+				if (operation === 'create') {
+					// Create Scheduler Lead
+						const meetingType = this.getNodeParameter('meetingType', i) as string;
+						const fieldsCollection = this.getNodeParameter('fields', i) as IDataObject;
+
+						// Parse meeting type flexibly: "id", "slug", or "id::slug"
+						let meetingTypeSlug: string | undefined;
+						
+						if (meetingType.includes('::')) {
+							// Format: "id::slug" - extract slug only
+							[, meetingTypeSlug] = meetingType.split('::');
+						} else if (/^\d+$/.test(meetingType)) {
+							// Numeric only: ID provided, but we need slug for this API
+							// Leave undefined - API may handle or throw error
+							meetingTypeSlug = undefined;
+						} else {
+							// Non-numeric: just slug
+							meetingTypeSlug = meetingType;
+						}
+
+						// Convert fields from fixedCollection to array format
+						const fieldsArray: Array<{ fieldIdentifier: string; fieldValue: string }> = [];
+						if (fieldsCollection && fieldsCollection.field) {
+							const fieldArray = fieldsCollection.field as Array<{ fieldIdentifier: string; fieldValue: string }>;
+							for (const field of fieldArray) {
+								if (field.fieldIdentifier && field.fieldValue) {
+									fieldsArray.push({
+										fieldIdentifier: field.fieldIdentifier,
+										fieldValue: field.fieldValue,
+									});
+								}
+							}
+						}
+
+						const body: IDataObject = {
+							fields: fieldsArray,
+							meetingTypeSlug: meetingTypeSlug,
+							UtmSource: 'n8n',
+						};
+
+						const responseData = await this.helpers.httpRequestWithAuthentication.call(
+							this,
+							'outplayApi',
+							{
+								method: 'POST',
+								baseURL: baseURL,
+								url: '/Scheduler/PostLeadInfo',
+								body,
 								json: true,
 							},
 						);
