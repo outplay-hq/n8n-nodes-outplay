@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-outplay",
-  "version": "0.2.13",
+  "version": "0.2.14",
   "description": "n8n nodes for Outplay API integration",
   "license": "MIT",
   "main": "dist/index.js",
