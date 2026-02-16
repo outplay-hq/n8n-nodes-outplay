@@ -165,7 +165,7 @@ export class Outplay implements INodeType {
 							{
 								displayName: 'Field Name or ID',
 								name: 'fieldIdentifier',
-								type: 'options',
+								type: 'string',
 								typeOptions: {
 									loadOptionsMethod: 'getMeetingFormFields',
 									loadOptionsDependsOn: ['meetingType'],
