@@ -6,7 +6,7 @@ import {
 	INodeType,
 	INodeTypeDescription,
 	IDataObject,
-	NodeOperationError,
+	NodeApiError,
 } from 'n8n-workflow';
 
 export class Outplay implements INodeType {
@@ -14,10 +14,25 @@ export class Outplay implements INodeType {
 		displayName: 'Outplay',
 		name: 'outplay',
 		icon: 'file:outplay-icon.svg',
-		group: ['transform'],
-		version: 1,
+		group: ['output'],
+		version: [1],
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
 		description: 'Interact with Outplay API',
+
+		codex: {
+			categories: ['CRM'],
+			subcategories: {
+				CRM: ['Leads', 'Contacts'],
+			},
+			resources: {
+				primaryDocumentation: [
+					{
+						url: 'https://support.outplay.ai/#/',
+					},
+				],
+			},
+		},
+
 		defaults: {
 			name: 'Outplay',
 		},
@@ -668,25 +683,28 @@ export class Outplay implements INodeType {
 				}
 			} catch (error) {
 				if (this.continueOnFail()) {
-					const errorData = error instanceof Error ? error.message : 'An issue occurred while processing the request';
-					returnData.push({ 
-						json: { 
-							error: errorData,
-							item: i,
+
+					const errorMessage =
+						error instanceof NodeApiError
+							? error.message
+							: error instanceof Error
+							? error.message
+							: 'Unknown API error';
+
+					returnData.push({
+						json: {
+							error: errorMessage,
+							resource,
 							operation,
-							resource 
+							itemIndex: i,
 						},
-						pairedItem: { item: i }
+						pairedItem: { item: i },
 					});
+
 					continue;
 				}
 				
-				const errorMessage = error instanceof Error ? error.message : 'Unknown issue';
-				throw new NodeOperationError(
-					this.getNode(),
-					`Failed to ${operation} ${resource} [item ${i}]: ${errorMessage}`,
-					{ itemIndex: i }
-				);
+				throw new NodeApiError(this.getNode(), error, { itemIndex: i });
 			}
 		}
 
