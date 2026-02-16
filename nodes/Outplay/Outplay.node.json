@@ -6,12 +6,12 @@
   "resources": {
     "primaryDocumentation": [
       {
-        "url": "https://docs.outplayhq.com/"
+        "url": "https://support.outplay.ai/#/"
       }
     ],
     "credentialDocumentation": [
       {
-        "url": "https://docs.outplayhq.com/authentication"
+        "url": "https://support.outplay.ai/#/"
       }
     ]
   },

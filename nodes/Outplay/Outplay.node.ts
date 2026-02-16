@@ -166,12 +166,8 @@ export class Outplay implements INodeType {
 								displayName: 'Field Name or ID',
 								name: 'fieldIdentifier',
 								type: 'string',
-								typeOptions: {
-									loadOptionsMethod: 'getMeetingFormFields',
-									loadOptionsDependsOn: ['meetingType'],
-								},
 								default: '',
-								description: 'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>',
+								description: 'The identifier of the form field',
 							},
 							{
 								displayName: 'Field Value',
@@ -449,77 +445,6 @@ export class Outplay implements INodeType {
 					return meetingTypes.map((meeting) => ({
 						name: meeting.MeetingType,
 						value: `${meeting.MeetingId}::${meeting.Slug}`,
-					}));
-				} catch {
-					return [];
-				}
-			},
-
-			async getMeetingFormFields(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
-				try {
-					const credentials = await this.getCredentials('outplayApi');
-					const location = (credentials.location as string).toLowerCase();
-					const baseURL = `https://${location}-api.outplayhq.com/api/v1`;
-
-					const meetingType = this.getNodeParameter('meetingType') as string;
-					
-					// Return empty array if no meeting type is selected yet
-					if (!meetingType || meetingType.trim() === '') {
-						return [];
-					}
-					
-					// Parse meeting type flexibly: "id", "slug", or "id::slug"
-					let meetingTypeId: string | undefined;
-					let meetingTypeSlug: string | undefined;
-					
-					if (meetingType.includes('::')) {
-						// Format: "id::slug"
-						[meetingTypeId, meetingTypeSlug] = meetingType.split('::');
-					} else if (/^\d+$/.test(meetingType)) {
-						// Numeric only: just ID
-						meetingTypeId = meetingType;
-					} else {
-						// Non-numeric: just slug
-						meetingTypeSlug = meetingType;
-					}
-
-					// Build query string with only provided parameters
-					const qs: IDataObject = {};
-					if (meetingTypeId) qs.meetingtypeid = meetingTypeId;
-					if (meetingTypeSlug) qs.meetingtypeslug = meetingTypeSlug;
-
-					const responseData = await this.helpers.httpRequestWithAuthentication.call(
-						this,
-						'outplayApi',
-						{
-							method: 'GET',
-							baseURL: baseURL,
-							url: '/Scheduler/GetMeetingFormFields',
-							qs,
-							json: true,
-						},
-					);
-
-					const result = responseData as {
-						success: boolean;
-						data: {
-							fields: {
-								[key: string]: {
-									fieldname: string;
-									ismandatory: boolean;
-								};
-							};
-						};
-					};
-
-					if (!result.success || !result.data || !result.data.fields) {
-						return [];
-					}
-
-					const fields = result.data.fields;
-					return Object.entries(fields).map(([identifier, fieldData]) => ({
-						name: `${fieldData.fieldname}${fieldData.ismandatory ? ' (Required)' : ''}`,
-						value: identifier,
 					}));
 				} catch {
 					return [];
