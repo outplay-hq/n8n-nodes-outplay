@@ -163,7 +163,7 @@ export class Outplay implements INodeType {
 						displayName: 'Field',
 						values: [
 							{
-								displayName: 'Field Name or ID',
+								displayName: 'Field Identifier',
 								name: 'fieldIdentifier',
 								type: 'string',
 								default: '',
